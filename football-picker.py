@@ -2,12 +2,13 @@
 
 import os
 import sys
-import re
+import random
 
 week = 1
 
+year = 2014
 if len(sys.argv) > 1: week = int(sys.argv[1])
-
+if len(sys.argv) > 2: year = int(sys.argv[2])
 
 def system(cmd):
     print "==> %s" % cmd
@@ -15,9 +16,8 @@ def system(cmd):
 
 
 print "Fetching data for week %d" % week
-year = 2014
 url = "http://www.usafootballpools.com/common/scores_schedules/nfl-weekly-schedule-scores-odds-weather-spreads.php?year=%d&gameboard_week=%d" % (year, week)
-filename = "week%02d.html" % week
+filename = "%dweek%02d.html" % (year, week)
 system('curl -s "%s" -o %s' % (url, filename))
 
 print "Parsing %s" % filename
@@ -57,7 +57,8 @@ while True:
 
     # Add data point
     games.append((away, home))
-    picks.append( (abs(spread), away, home, [home, away][spread > 0]) )
+    r = float(random.randint(0,9)) / 100.
+    picks.append( (abs(spread) + r, away, home, [home, away][spread > 0]) )
 
 print "  %d games" % len(games)
 
@@ -68,18 +69,18 @@ picks = sorted(picks)
 picks_dict = {}
 for rank, pick in enumerate(picks):
     margin, away, home, winner = pick
-    picks_dict[(away, home)] = (winner, rank + 1)
+    picks_dict[(away, home)] = (winner, rank + 1, margin)
 
 # Print picks in order
 print "Picks:"
 lines = ["Week %d" % week, "", "AWAY,,HOME,,,PICK,RANK"]
 for away, home in games:
-    winner, rank = picks_dict[(away, home)]
+    winner, rank, margin = picks_dict[(away, home)]
     lines.append("%s,,%s,,,%s,%d" % (away, home, winner, rank))
-    print "  %s @ %s   *%s*  %s" % (away, home, winner, rank)
+    print "  %20s @ %20s   *%20s*  (%02d)      spread=%0.2f" % (away, home, winner, rank, margin)
 
 # Save results
-csv = "week%02d.csv" % week
+csv = "%dweek%02d.csv" % (year, week)
 print "Writing %s" % csv
 open(csv, "wt").writelines("\n".join(lines))
 
