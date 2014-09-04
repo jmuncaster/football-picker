@@ -72,10 +72,10 @@ for rank, pick in enumerate(picks):
 
 # Print picks in order
 print "Picks:"
-lines = []
+lines = ["Week %d" % week, "", "AWAY,,HOME,,,PICK,RANK"]
 for away, home in games:
     winner, rank = picks_dict[(away, home)]
-    lines.append("%s,@,%s,,,%s,%d" % (away, home, winner, rank))
+    lines.append("%s,,%s,,,%s,%d" % (away, home, winner, rank))
     print "  %s @ %s   *%s*  %s" % (away, home, winner, rank)
 
 # Save results
