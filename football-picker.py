@@ -4,7 +4,12 @@ import os
 import sys
 import random
 
-week = 1
+from datetime import datetime, timedelta
+
+now = datetime.now()
+then = datetime(2014, 9, 2)
+diff = now - then
+week = 1 + diff.days / 7
 
 year = 2014
 if len(sys.argv) > 1: week = int(sys.argv[1])
@@ -85,4 +90,5 @@ print "Writing %s" % csv
 open(csv, "wt").writelines("\n".join(lines))
 
 print "Done."
+
 
