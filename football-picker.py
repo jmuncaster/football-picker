@@ -12,8 +12,10 @@ diff = now - then
 week = 1 + diff.days / 7
 
 year = 2014
-if len(sys.argv) > 1: week = int(sys.argv[1])
-if len(sys.argv) > 2: year = int(sys.argv[2])
+#if len(sys.argv) > 1: week = int(sys.argv[1])
+#if len(sys.argv) > 2: year = int(sys.argv[2])
+
+blanks = sys.argv[1:]
 
 def system(cmd):
     print "==> %s" % cmd
@@ -58,14 +60,29 @@ while True:
     # Get spread
     line, lines = find_prefix(lines, "<TD")
     line, lines = find_prefix(lines, "<TD")
-    spread = float(line.split("</B>")[-2] .split("<B>")[-1])
+    spread_str = line.split("</B>")[-2] .split("<B>")[-1]
+    if not spread_str:
+        print "  WARNING: No spread for %s at %s game" % (away, home)
+        print "  Looking at command-line parameters for spread..."
+        if blanks:
+            spread_str = blanks[0]
+            blanks = blanks[1:]
+            print "  ==> Got spread for %s at %s of %s. Please verify." % \
+              (away, home, spread_str)
+        else:
+            url = "http://www.footballlocks.com/nfl_point_spreads.shtml"
+            raise Exception("""
+                Could not find spread. Please pass spread on command-line.
+                Refer to %s""" % url)
+
+    spread = float(spread_str)
 
     # Add data point
     games.append((away, home))
     r = float(random.randint(0,9)) / 100.
     picks.append( (abs(spread) + r, away, home, [home, away][spread > 0]) )
 
-print "  %d games" % len(games)
+print "  Parsed %d games." % len(games)
 
 # Sort low to high
 picks = sorted(picks)
@@ -82,7 +99,7 @@ lines = ["Week %d" % week, "", "AWAY,,HOME,,,PICK,RANK"]
 for away, home in games:
     winner, rank, margin = picks_dict[(away, home)]
     lines.append("%s,,%s,,,%s,%d" % (away, home, winner, rank))
-    print "  %20s @ %20s   *%20s*  (%02d)      spread=%0.2f" % (away, home, winner, rank, margin)
+    print "  %20s @ %20s   ==> %20s <==     (%02d)    spread=%0.2f" % (away, home, winner, rank, margin)
 
 # Save results
 csv = "%dweek%02d.csv" % (year, week)
